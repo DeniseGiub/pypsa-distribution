@@ -1,0 +1,6 @@
+
+extendable_carriers:
+  Generator: '[solar, onwind, offwind-ac, offwind-dc, OCGT]'
+  Link: '[]'
+  StorageUnit: '[]'
+  Store: '[battery, H2]'
