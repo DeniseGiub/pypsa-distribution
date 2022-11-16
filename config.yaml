@@ -132,7 +132,7 @@ electricity:
 
   extendable_carriers:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
-    StorageUnit: [] # battery, H2
+    StorageUnit: ["battery"]  #H2
     Store: [battery, H2]
     Link: []  # H2 pipeline
 
@@ -296,7 +296,7 @@ plotting:
 
   vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
   conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
-  storage_techs: ["hydro+PHS", "battery", "H2"]
+  # storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
   AC_carriers: ["AC line", "AC transformer"]
   link_carriers: ["DC line", "Converter AC-DC"]
@@ -362,3 +362,4 @@ plotting:
 
 tech_modelling:
   general_vre: ["onwind", "solar"]
+  storage_techs: ["lithium", "lead acid"]
