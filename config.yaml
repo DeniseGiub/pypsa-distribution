@@ -360,12 +360,5 @@ plotting:
     lines: "Transmission Lines"
     ror: "Run of River"
 
-  tech_modelling:
-    general_vre: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
-    hydro_vre: ["ror"]
-    pumped_hydro: ["PHS"]
-    reseerve_hydro: ["hydro"]
-    conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
-    load_carriers: ["AC load"]
-    AC_carriers: ["AC line", "AC transformer"]
-    link_carriers: ["DC line", "Converter AC-DC"]
+tech_modelling:
+  general_vre: ["onwind", "solar"]
