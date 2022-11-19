@@ -380,3 +380,16 @@ tech_modelling:
   storage_techs: ["lithium", "lead acid"]
   conv_techs: ["diesel"]  
   load_carriers: ["AC load"]
+
+
+microgrids_list:
+  micA: #random place in Sierra Leone
+    name: "nice name"
+    lat: 7.79 
+    lon: -11
+    radius: 5000 #metres
+
+  micB: 
+    lat:
+    lon:
+    radius: 
