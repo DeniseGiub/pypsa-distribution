@@ -384,10 +384,14 @@ tech_modelling:
 
 microgrids_list:
   micA: #random place in Sierra Leone
-    name: "nice name"
-    lat: 7.79 
-    lon: -11
-    radius: 5000 #metres
+    name: "micA"
+    # lat: 7.79 
+    # lon: -11
+    # radius: 5000 #metres
+    Point1:
+    Point2:
+    Point3:
+    Point4:
 
   micB: 
     lat:

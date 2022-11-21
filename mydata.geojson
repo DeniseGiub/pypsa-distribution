@@ -1,1 +1,1 @@
-{"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [-11, 7.79]}, "properties": {"subType": "Circle", "radius": [5000]}}]}
+{"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[-12.023283, 7.951067], [-11.450478, 7.951067], [-11.450478, 7.714312], [-12.023283, 7.714312]]]}, "properties": {"Microgrid": "nice name"}}]}
