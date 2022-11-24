@@ -5,19 +5,17 @@ import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-#%%
-from create_network import n
-print(n)
-#%%
-#Load yaml files
 import yaml
+from create_network import n
 
+#Load yaml file
 with open(f"C://Users//denis//OneDrive//Desktop//Mini grids//pypsa-distribution//Scripts//config.yaml") as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
-
+#%%
 #I create the bus, located in the centre of microgrid A (micA)
 
-n.madd("Bus", ["onebus"], x=config["microgrids_list"]["micA"]["lon"], y=config["microgrids_list"]["micA"]["lat"], carrier="AC", v_nom=20)
+n.madd("Bus", ["onebus"], x=10.2, y=9.3, carrier="AC", v_nom=20)
+# x=config["microgrids_list"]["micA"]["lon"], y=config["microgrids_list"]["micA"]["lat"]
 
 #TODO file cost last two lines are completely invended
 costs=pd.read_csv(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\costs.csv')
@@ -152,14 +150,14 @@ costs = load_costs(
     config["electricity"],
     Nyears,
     )
-
+#%%
 def attach_wind_and_solar(n, costs, tech_modelling, extendable_carriers):
 
     _add_missing_carriers_from_costs(n, costs, tech_modelling)
 
     for tech in tech_modelling:
        
-        with xr.open_dataset(f"Scripts/renewable_profiles/profile_{tech}.nc") as ds:
+        with xr.open_dataset(f"renewable_profiles/profile_{tech}.nc") as ds:
             
             if ds.indexes["bus"].empty:
                 continue   
@@ -188,18 +186,76 @@ attach_wind_and_solar(
     config["tech_modelling"]["general_vre"],
     config["electricity"]["extendable_carriers"],
     )
-
-carrier_dict = {
+#%%
+def load_powerplants(ppl_fn):
+    carrier_dict = {
         "ocgt": "OCGT",
         "ccgt": "CCGT",
         "bioenergy": "biomass",
         "ccgt, thermal": "CCGT",
         "hard coal": "coal",
     }
+    return (
+        pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
+        # .to_pypsa_names() #commented because I had error "AttributeError: 'DataFrame' object has no attribute 'to_pypsa_names'"
+        # .convert_country_to_alpha2() #commented because I had error "AttributeError: 'DataFrame' object has no attribute 'country_to_Alpha2'"
+        .rename(columns=str.lower)
+        .drop(columns=["efficiency"])
+        .replace({"carrier": carrier_dict})
+    )
 
-ppl_fn=r'C://Users//denis//OneDrive//Desktop//Mini grids//pypsa-distribution//powerplants.csv'
-ppl=pd.read_csv(ppl_fn, index_col=0, dtype={"bus":"str"}).rename(columns=str.lower).drop(columns=["efficiency"]).replace({"carrier": carrier_dict})
 
+ppl_fn="C://Users//denis//OneDrive//Desktop//Mini grids//pypsa-distribution//Scripts//powerplants.csv"
+
+ppl=load_powerplants(ppl_fn)
+#%%
+
+# def attach_conventional_generators(
+#     n,
+#     costs,
+#     ppl,
+#     tech_modelling,
+#     extendable_carriers,
+#     conventional_carriers,
+# ):
+#     carriers={'oil'}
+#     _add_missing_carriers_from_costs(n, costs, tech_modelling)
+
+#     ppl = (
+#         ppl.query("fueltype in @carriers")
+#         .join(costs, on="fueltype", rsuffix="_r")
+#         .rename(index=lambda s: "C" + str(s))
+#     )
+#     ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency)
+    
+#     n.madd(
+#         "Generator",
+#         ppl.index,
+#         carrier=ppl.technology,
+#         bus=["onebus"],
+        # p_nom_min=ppl.p_nom.where(ppl.rechnology.isin(conventional_carriers), 0),
+        # p_nom=ppl.p_nom.where(ppl.technology.isin(conventional_carriers), 0),
+        # p_nom_extendable=ppl.technology.isin(extendable_carriers["Generator"]),
+        # efficiency=ppl.efficiency,
+        # marginal_cost=ppl.marginal_cost,
+        # capital_cost=ppl.capital_cost,
+        # build_year=ppl.datein.fillna(0).astype(int),
+        # lifetime=(ppl.dateout - ppl.datein).fillna(np.inf),
+
+    
+   
+    
+#%%
+# attach_conventional_generators(
+#     n,
+#     costs,
+#     ppl,
+#     config["tech_modelling"]["conv_techs"],
+#     config["electricity"]["extendable_carriers"],
+#     config["electricity"]["conventional_carriers"],
+#     )
+    
+#%%
 def attach_storageunits(n, costs,technologies, extendable_carriers ):
 
     buses_i = n.buses.index
@@ -227,30 +283,33 @@ attach_storageunits(n,
                     config["tech_modelling"]["storage_techs"],
                     config["electricity"]["extendable_carriers"],
                     )
-
-load_df=pd.read_excel(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\my_file.xlsx')
-
-n_load=35
+#%%
+load_df=pd.read_excel(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Scripts\electric_load.xlsx')
+#%%
+load_df=load_df(header=None)
+#%%
+# n_load=35
 load_df=load_df.set_index([n.snapshots])
+#%%
 load_df.index.names=['time']
+#%%
+# index=pd.Index( list(range(n_load)))
 
-index=pd.Index( list(range(n_load)))
-
-def attach_load(n, load_paths, index, load_df, tech_modelling):
+def attach_load(n, load_paths, load_df, tech_modelling):
     
-    n.madd("Load", index ,bus=["onebus"], carrier="AC", p_set=load_df)
+    n.madd("Load", ["My_load"], bus=["onebus"], carrier="AC", p_set=load_df)
 
-load_paths=r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\my_file.xlsx'
+load_paths=r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Scripts\electric_load.xlsx'
 
-attach_load(n, load_paths, index, load_df, config["tech_modelling"]["load_carriers"])
+attach_load(n, load_paths, load_df, config["tech_modelling"]["load_carriers"])
 
 print(n)
+#%%
+# Optimization
+from pypsa.linopf import ilopf
 
-# # Optimization
-# from pypsa.linopf import ilopf
+solver_name="gurobi"
 
-# solver_name="gurobi"
+n.lopf(n.snapshots, solver_name=solver_name, pyomo=False)
 
-# n.lopf(n.snapshots, solver_name=solver_name, pyomo=False)
-
-# n.iplot()
+# %%

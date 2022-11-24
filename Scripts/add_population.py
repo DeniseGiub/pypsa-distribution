@@ -5,11 +5,77 @@ import rasterio
 import rasterio.mask
 import georasters as gr
 import geojson
-from geojson import FeatureCollection
+import pandas as pd
 import yaml
+from geojson import FeatureCollection
+from create_network import n
 
 with open(r'config.yaml') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
+
+
+# #This script downloads WorldPop data for the desired country
+
+# import requests 
+# import shutil
+# import os
+
+# def download_WorldPop_standard(
+#     country_code,
+#     year=2020,
+#     update=False,
+#     size_min=300,
+# ):
+#     """
+#     Download tiff file for each country code using the standard method from worldpop datastore with 1kmx1km resolution.
+
+#     Parameters
+#     ----------
+#     country_code : str
+#         Two letter country codes of the downloaded files.
+#         Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+#     year : int
+#         Year of the data to download
+#     update : bool
+#         Update = true, forces re-download of files
+#     size_min : int
+#         Minimum size of each file to download
+#     Returns
+#     -------
+#     WorldPop_inputfile : str
+#         Path of the file
+#     WorldPop_filename : str
+#         Name of the file
+#     """
+#     WorldPop_filename = f"srb_ppp_{year}_UNadj_constrained.tif"
+#     WorldPop_urls = [
+#             f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/SRB/{WorldPop_filename}",
+#             f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/SRB/{WorldPop_filename}",
+#         ]
+#     WorldPop_inputfile = os.path.join(
+#         os.getcwd(), "data", "WorldPop", WorldPop_filename
+#     )  # Input filepath tif
+
+#     if not os.path.exists(WorldPop_inputfile) or update is True:
+    
+#         #  create data/osm directory
+#         os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
+
+#         loaded = False
+#         for WorldPop_url in WorldPop_urls:
+#             with requests.get(WorldPop_url, stream=True) as r:
+#                 with open(WorldPop_inputfile, "wb") as f:
+#                     if float(r.headers["Content-length"]) > size_min:
+#                         shutil.copyfileobj(r.raw, f)
+#                         loaded = True
+#                         break
+
+#     return WorldPop_inputfile, WorldPop_filename
+
+
+# download_WorldPop_standard(
+#                     config["countries"], 2020, False, 300)
+
 
 my_feature=[]
 
@@ -20,13 +86,14 @@ my_feature={
     "type": "Polygon",
     "coordinates":  [
         [
-          [-12.023283,7.951067],
-          [-11.450478, 7.951067],
-          [-11.450478, 7.714312],         
-          [-12.023283, 7.714312]
+          [config["microgrids_list"]["micA"]["Coordinates"]["Point1"]["lon1"], config["microgrids_list"]["micA"]["Coordinates"]["Point1"]["lat1"]],
+          [config["microgrids_list"]["micA"]["Coordinates"]["Point2"]["lon2"], config["microgrids_list"]["micA"]["Coordinates"]["Point2"]["lat2"]],
+          [config["microgrids_list"]["micA"]["Coordinates"]["Point3"]["lon3"], config["microgrids_list"]["micA"]["Coordinates"]["Point3"]["lat3"]],         
+          [config["microgrids_list"]["micA"]["Coordinates"]["Point4"]["lon4"], config["microgrids_list"]["micA"]["Coordinates"]["Point4"]["lat4"]],
         ]
     ]
   },
+
   "properties": {
     "Microgrid": config["microgrids_list"]["micA"]["name"]
   }
@@ -34,13 +101,13 @@ my_feature={
 
 FeatureCollection = FeatureCollection([my_feature])
 
-with open('mydata.geojson', 'w') as f:
+with open('microgrid_shape.geojson', 'w') as f:
         f.write(geojson.dumps(FeatureCollection))
 
-gdf = gpd.read_file('mydata.geojson')
-gdf.to_file('file.shp')
+gdf = gpd.read_file('microgrid_shape.geojson')
+gdf.to_file('microgrid_shape.shp')
 
-with fiona.open("file.shp", "r") as shapefile:
+with fiona.open("microgrid_shape.shp", "r") as shapefile:
     shapes = [feature["geometry"] for feature in shapefile]
 
 with rasterio.open("SL.tif") as src:
@@ -52,26 +119,45 @@ out_meta.update({"driver": "GTiff",
                  "width": out_image.shape[2],
                  "transform": out_transform})
 
-with rasterio.open("sle.masked.tif", "w", **out_meta) as dest:
+with rasterio.open("SL.masked.tif", "w", **out_meta) as dest:
     dest.write(out_image)
-
+#%%
 myRaster = 'SL.tif'
 total_pop= gr.from_file(myRaster)
     
-total_pop=total_pop.to_geopandas()
+total_pop=total_pop.to_geopandas() 
 
-total_pop=(total_pop['value'].sum())
+total_pop=(total_pop['value'].sum()) #Total SL population
 
-myRaster = 'sle.masked.tif'
+myRaster = 'SL.masked.tif'
 pop_microgrid = gr.from_file(myRaster)
     
-pop_microgrid=pop_microgrid.to_geopandas()
+pop_microgrid=pop_microgrid.to_geopandas() 
 
-pop_microgrid=(pop_microgrid['value'].sum())
+pop_microgrid=(pop_microgrid['value'].sum()) #Microgrid population
+#%%
+#I import the dataframe of electricity demand for Africa
+import pandas as pd
+df_demand=pd.read_excel(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Africa.xlsx', index_col = None)
+#%%
+#I select the rows related to Benin (since there are no data for SL)
+df_demand_SL=df_demand.loc[26280:35039, :]
 
-#Percentage of population inside the microgrid 
+# I select the column "electricity demand"
+df_demand_SL=df_demand_SL["Electricity demand"]
+#%%
+df_demand_SL=pd.DataFrame(df_demand_SL)
 
-p=(pop_microgrid/total_pop)*100
+#%%
+# df_demand_SL=df_demand_SL.reindex([n.snapshots])
+#%%
+# df_demand_SL.index.names=['time']
 
+
+p=(pop_microgrid/total_pop)*100 #Coefficient
+
+electric_load=df_demand_SL/p #Electric load of the minigrid
+
+electric_load_xlsx=electric_load.to_excel('electric_load.xlsx', index=False) #header=None) #index=False)
 
 # %%
