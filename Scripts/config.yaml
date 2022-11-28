@@ -385,15 +385,18 @@ tech_modelling:
 microgrids_list:
   micA: #random place in Sierra Leone
     name: "micA"
-    # lat: 7.79 
-    # lon: -11
-    # radius: 5000 #metres
-    Point1:
-    Point2:
-    Point3:
-    Point4:
+    Coordinates: 
+      Point1:
+        lon1: -11.8448
+        lat1: 7.9683
+      Point2: 
+        lon2: -11.5166
+        lat2: 7.9683
+      Point3:
+        lon3: -11.5166
+        lat3: 7.7710
+      Point4:
+        lon4: -11.8448
+        lat4: 7.7710
 
-  micB: 
-    lat:
-    lon:
-    radius: 
+year: 2019
