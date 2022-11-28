@@ -156,7 +156,7 @@ def attach_wind_and_solar(n, costs, tech_modelling, extendable_carriers):
 
     for tech in tech_modelling:
        
-        with xr.open_dataset(f"renewable_profiles/profile_{tech}.nc") as ds:
+        with xr.open_dataset(f"Scripts/renewable_profiles/profile_{tech}.nc") as ds:
             
             if ds.indexes["bus"].empty:
                 continue   
