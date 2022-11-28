@@ -32,7 +32,7 @@ with open(f"C://Users//denis//OneDrive//Desktop//Mini grids//pypsa-distribution/
 #     ----------
 #     country_code : str
 #         Two letter country codes of the downloaded files.
-#         Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+        # Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
 #     year : int
 #         Year of the data to download
 #     update : bool
@@ -107,7 +107,7 @@ gdf.to_file('microgrid_shape.shp')
 with fiona.open("microgrid_shape.shp", "r") as shapefile:
     shapes = [feature["geometry"] for feature in shapefile]
 
-with rasterio.open("sle_ppp_2020.tif") as src:
+with rasterio.open("sle_ppp_2019_constrained.tif") as src:
     out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
     out_meta = src.meta
 
@@ -118,8 +118,8 @@ out_meta.update({"driver": "GTiff",
 
 with rasterio.open("SL.masked.tif", "w", **out_meta) as dest:
     dest.write(out_image)
-#%%
-myRaster = 'sle_ppp_2020.tif'
+
+myRaster = 'sle_ppp_2019_constrained.tif'
 total_pop= gr.from_file(myRaster)
     
 total_pop=total_pop.to_geopandas() 
@@ -132,11 +132,11 @@ pop_microgrid = gr.from_file(myRaster)
 pop_microgrid=pop_microgrid.to_geopandas() 
 
 pop_microgrid=(pop_microgrid['value'].sum()) #Microgrid population
-#%%
+
 #I import the dataframe of electricity demand for Africa
 import pandas as pd
 df_demand=pd.read_excel(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Africa.xlsx', index_col = None)
-#%%
+
 #I select the rows related to Benin (since there are no data for SL)
 df_demand_SL=df_demand.loc[26280:35039, :]
 
@@ -150,5 +150,3 @@ p=(pop_microgrid/total_pop)*100 #Coefficient
 electric_load=df_demand_SL/p #Electric load of the minigrid
 
 electric_load_xlsx=electric_load.to_excel('electric_load_1.xlsx', index=False) 
-
-# %%
