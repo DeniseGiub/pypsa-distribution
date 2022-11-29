@@ -149,7 +149,7 @@ costs = load_costs(
     config["electricity"],
     Nyears,
     )
-#%%
+
 def attach_wind_and_solar(n, costs, tech_modelling, extendable_carriers):
 
     _add_missing_carriers_from_costs(n, costs, tech_modelling)
@@ -185,8 +185,8 @@ attach_wind_and_solar(
     config["tech_modelling"]["general_vre"],
     config["electricity"]["extendable_carriers"],
     )
-#%%
-def attach_conventional_generator(n, tech_modelling, conventional_carriers):
+
+def attach_conventional_generators(n, tech_modelling, conventional_carriers):
 
     for tech in tech_modelling:
 
@@ -206,12 +206,12 @@ def attach_conventional_generator(n, tech_modelling, conventional_carriers):
             p_max_pu=1,
             )
 
-attach_conventional_generator(
+attach_conventional_generators(
     n, 
     config["tech_modelling"]["conv_techs"],
     config["electricity"]["conventional_carriers"]
 )
-#%%
+
 
 def attach_storageunits(n, costs,technologies, extendable_carriers ):
 
@@ -239,8 +239,8 @@ attach_storageunits(n,
                     config["electricity"]["extendable_carriers"],
                     )
 #%%
-load_df=pd.read_excel(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Scripts\electric_load.xlsx')
-
+load_df=pd.read_excel(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Scripts\electric_load_1.xlsx')
+#%%
 
 load_df=load_df.set_index([n.snapshots])
 
@@ -253,3 +253,8 @@ def attach_load(n, load_paths, load_df, tech_modelling):
 load_paths=r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Scripts\electric_load.xlsx'
 
 attach_load(n, load_paths, load_df, config["tech_modelling"]["load_carriers"])
+
+
+print(n)
+
+# %%
