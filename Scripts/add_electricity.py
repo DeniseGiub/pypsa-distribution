@@ -1,5 +1,5 @@
 #Adding components to the network 
-
+#%%
 import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ with open(f"C://Users//denis//OneDrive//Desktop//Mini grids//pypsa-distribution/
 #I create the bus, located in the centre of microgrid A (micA)
 
 n.madd("Bus", ["onebus"], carrier="AC", v_nom=20)
-
+#%%
 #file "costs" last two lines are completely invended
 costs=pd.read_csv(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\costs.csv')
 
@@ -149,14 +149,14 @@ costs = load_costs(
     config["electricity"],
     Nyears,
     )
-
+#%%
 def attach_wind_and_solar(n, costs, tech_modelling, extendable_carriers):
 
     _add_missing_carriers_from_costs(n, costs, tech_modelling)
 
     for tech in tech_modelling:
        
-        with xr.open_dataset(f"Scripts/renewable_profiles/profile_{tech}.nc") as ds:
+        with xr.open_dataset(f"renewable_profiles/profile_{tech}.nc") as ds:
             
             if ds.indexes["bus"].empty:
                 continue   
@@ -185,14 +185,38 @@ attach_wind_and_solar(
     config["tech_modelling"]["general_vre"],
     config["electricity"]["extendable_carriers"],
     )
-    
+#%%
+def attach_conventional_generator(n, tech_modelling, conventional_carriers):
+
+    for tech in tech_modelling:
+
+        buses_i = n.buses.index
+        n.madd(
+            "Generator",
+            buses_i ,
+            " " + tech, 
+            bus=["onebus"], 
+            carrier=tech,
+            p_nom_extendable=True,
+            p_nom_max=100,
+            marginal_cost=10, #random number (to be corrected)
+            capital_cost=1000, #random number (to be corrected)
+            efficiency=0.3,
+            p_set=100,
+            p_max_pu=1,
+            )
+
+attach_conventional_generator(
+    n, 
+    config["tech_modelling"]["conv_techs"],
+    config["electricity"]["conventional_carriers"]
+)
+#%%
 
 def attach_storageunits(n, costs,technologies, extendable_carriers ):
 
-    buses_i = n.buses.index
-
     for tech in technologies:
-        
+        buses_i = n.buses.index
         n.madd(
             "StorageUnit",
             buses_i, 
@@ -214,7 +238,7 @@ attach_storageunits(n,
                     config["tech_modelling"]["storage_techs"],
                     config["electricity"]["extendable_carriers"],
                     )
-
+#%%
 load_df=pd.read_excel(r'C:\Users\denis\OneDrive\Desktop\Mini grids\pypsa-distribution\Scripts\electric_load.xlsx')
 
 

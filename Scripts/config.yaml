@@ -137,7 +137,7 @@ electricity:
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
   custom_powerplants: false
 
-  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]  #Now diesel=oil
+  conventional_carriers: [diesel]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
 
   estimate_renewable_capacities:
