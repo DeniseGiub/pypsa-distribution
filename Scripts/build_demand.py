@@ -1,4 +1,4 @@
-
+#%%
 import geopandas as gpd
 import fiona
 import rasterio
@@ -12,7 +12,7 @@ from create_network import n
 
 with open(f"C://Users//denis//OneDrive//Desktop//Mini grids//pypsa-distribution//Scripts//config.yaml") as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
-
+#%%
 # #This script downloads WorldPop data for SL country. 2019 data are taken, since 2020 data are not available for Sierra Leone
 
 # import requests 
@@ -73,20 +73,64 @@ with open(f"C://Users//denis//OneDrive//Desktop//Mini grids//pypsa-distribution/
 # download_WorldPop_standard(
 #                     config["countries"], config["year"], False, 300)
 
+
+#****
+
+#The vertexes of the rectangular are defined: they are the point P1=(x1,y1), P2=(x2,y2), P3=(x3,y3), P4=(x4,y4)
+#x stands for longitude, y stands for latitude
+
+xcenter=config["microgrids_list"]["micA"]["Centre"]["lon"]
+ycenter=config["microgrids_list"]["micA"]["Centre"]["lat"]
+DeltaX=config["microgrids_list"]["micA"]["Sides"]["Deltalon"]
+DeltaY=config["microgrids_list"]["micA"]["Sides"]["Deltalat"]
+
+x1 = xcenter - DeltaX*0.5
+y1 = ycenter + DeltaY*0.5
+
+x2 = xcenter + DeltaX*0.5
+y2 = ycenter + DeltaY*0.5
+
+x3 = xcenter - DeltaX*0.5
+y3 = ycenter - DeltaY*0.5
+
+x4 = xcenter + DeltaX*0.5
+y4 = ycenter - DeltaY*0.5
+
+
+
+# my_feature={
+#   "type": "Feature",
+#   "geometry": {
+#     "type": "Polygon",
+#     "coordinates":  [
+#         [
+#           [config["microgrids_list"]["micA"]["Coordinates"]["Point1"]["lon1"], config["microgrids_list"]["micA"]["Coordinates"]["Point1"]["lat1"]],
+#           [config["microgrids_list"]["micA"]["Coordinates"]["Point2"]["lon2"], config["microgrids_list"]["micA"]["Coordinates"]["Point2"]["lat2"]],
+#           [config["microgrids_list"]["micA"]["Coordinates"]["Point3"]["lon3"], config["microgrids_list"]["micA"]["Coordinates"]["Point3"]["lat3"]],         
+#           [config["microgrids_list"]["micA"]["Coordinates"]["Point4"]["lon4"], config["microgrids_list"]["micA"]["Coordinates"]["Point4"]["lat4"]],
+#         ]
+#     ]
+#   },
+
+#   "properties": {
+#     "Microgrid": config["microgrids_list"]["micA"]["name"]
+#   }
+# }
 #%%
+
+#I create a rectangle which will be the minigrid
 my_feature=[]
 
-#I create a rectangle
 my_feature={
   "type": "Feature",
   "geometry": {
     "type": "Polygon",
     "coordinates":  [
         [
-          [config["microgrids_list"]["micA"]["Coordinates"]["Point1"]["lon1"], config["microgrids_list"]["micA"]["Coordinates"]["Point1"]["lat1"]],
-          [config["microgrids_list"]["micA"]["Coordinates"]["Point2"]["lon2"], config["microgrids_list"]["micA"]["Coordinates"]["Point2"]["lat2"]],
-          [config["microgrids_list"]["micA"]["Coordinates"]["Point3"]["lon3"], config["microgrids_list"]["micA"]["Coordinates"]["Point3"]["lat3"]],         
-          [config["microgrids_list"]["micA"]["Coordinates"]["Point4"]["lon4"], config["microgrids_list"]["micA"]["Coordinates"]["Point4"]["lat4"]],
+          [x1,y1],
+          [x2,y2],
+          [x3,y3],         
+          [x4,y4],
         ]
     ]
   },
@@ -95,7 +139,7 @@ my_feature={
     "Microgrid": config["microgrids_list"]["micA"]["name"]
   }
 }
-
+#%%
 FeatureCollection = FeatureCollection([my_feature])
 
 with open('microgrid_shape.geojson', 'w') as f:
@@ -107,7 +151,7 @@ gdf.to_file('microgrid_shape.shp')
 with fiona.open("microgrid_shape.shp", "r") as shapefile:
     shapes = [feature["geometry"] for feature in shapefile]
 
-with rasterio.open("sle_ppp_2019_constrained.tif") as src:
+with rasterio.open('sle_ppp_2019_constrained.tif') as src:
     out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
     out_meta = src.meta
 
@@ -149,4 +193,7 @@ p=(pop_microgrid/total_pop)*100 #Coefficient
 
 electric_load=df_demand_SL/p #Electric load of the minigrid
 
-electric_load_xlsx=electric_load.to_excel('electric_load_1.xlsx', index=False) 
+electric_load_xlsx=electric_load.to_excel('electric_load.xlsx', index=False) 
+
+
+# %%

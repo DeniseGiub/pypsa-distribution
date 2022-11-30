@@ -384,19 +384,29 @@ tech_modelling:
 
 microgrids_list:
   micA: #random place in Sierra Leone
-    name: "micA"
-    Coordinates: 
-      Point1:
-        lon1: -11.8448
-        lat1: 7.9683
-      Point2: 
-        lon2: -11.5166
-        lat2: 7.9683
-      Point3:
-        lon3: -11.5166
-        lat3: 7.7710
-      Point4:
-        lon4: -11.8448
-        lat4: 7.7710
+  name: ["nicename"]
+  Location:
+    Centre: 
+      lon: -11.6807
+      lat: 7.8697
+    Sides:
+      Deltalon: 0.3282
+      Deltalat: 0.1973
+    
 
 year: 2019
+
+    # Coordinates: 
+      #   Point1:
+      #     lon1: -11.8448
+      #     lat1: 7.9683
+      #   Point2: 
+      #     lon2: -11.5166
+      #     lat2: 7.9683
+      #   Point3:
+      #     lon3: -11.5166
+      #     lat3: 7.7710
+      #   Point4:
+      #     lon4: -11.8448
+      #     lat4: 7.7710
+    
